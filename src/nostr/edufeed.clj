@@ -164,7 +164,8 @@
                      :creator (extract-tag tags "creator")
                      :description (extract-tag tags "description")
                      :keywords (extract-tag-array tags "keywords")
-                     :about (transform-skos-fields (filter #(= "about" (first %)) tags))}]
+                     :about (transform-skos-fields (filter #(= "about" (first %)) tags))
+                     :learningResourceType (transform-skos-fields (filter #(= "learningResourceType" (first %)) tags))}]
      (if skip-raw-event
        amb-result
        (assoc amb-result
