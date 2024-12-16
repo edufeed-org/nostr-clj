@@ -16,18 +16,17 @@
   Returns:
   - The websocket instance with your handlers."
   [uri {:keys [on-message-handler on-open-handler on-close-handler]}]
-  (let [ws @(ws/websocket uri
-                          {:on-message (fn [ws msg last?]
-                                         (let [msg-str (if (instance? CharBuffer msg)
-                                                         (str msg)
-                                                         msg)
-                                               parsed (json/parse-string msg-str true)]
-                                           (on-message-handler  ws parsed)))
-                           :on-open (fn [ws]
-                                      (on-open-handler  ws))
-                           :on-close (fn [ws status reason]
-                                       (on-close-handler  ws status reason))})]
-    ws))
+  @(ws/websocket uri
+                 {:on-message (fn [ws msg last?]
+                                (let [msg-str (if (instance? CharBuffer msg)
+                                                (str msg)
+                                                msg)
+                                      parsed (json/parse-string msg-str true)]
+                                  (on-message-handler  ws parsed)))
+                  :on-open (fn [ws]
+                             (on-open-handler  ws))
+                  :on-close (fn [ws status reason]
+                              (on-close-handler  ws status reason))}))
 
 (defn subscribe [ws msg]
   (ws/send! ws (json/generate-string msg)))
@@ -59,7 +58,7 @@
                                                 (swap! resources conj event)) ;; Add to resources
                                       "EOSE"  (do
                                                 (deliver result-promise @resources) ;; Deliver resources to the promise
-                                                (close! ws))))
+                                                (close! ws)))) ;; TODO should I really close here?
               :on-open-handler (fn [ws]
                                  (send! ws ["REQ" (random-uuid) filter]))})
     @result-promise))
@@ -76,7 +75,3 @@
     (subscribe ws {:kinds [1]
                    :limit 2})))
 
-(comment
-  (+ 1 1 1 1)
-
-  (str "Hello " "Basti"))
