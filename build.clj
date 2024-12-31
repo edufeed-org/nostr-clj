@@ -4,9 +4,7 @@
             [deps-deploy.deps-deploy :as dd]))
 
 (def lib 'net.clojars.laoc/nostr)
-(def version "0.0.1-SNAPSHOT")
-#_ ; alternatively, use MAJOR.MINOR.COMMITS:
-(def version (format "1.0.%s" (b/git-count-revs nil)))
+(def version "0.0.1")
 (def class-dir "target/classes")
 
 (defn test "Run all the tests." [opts]

@@ -2,7 +2,7 @@
 
 Do nostr stuff with Clojure.
 
-Heavy WIP.
+Heavy WIP. At this point it probably won't make much sense too you.
 
 ## Usage
 
