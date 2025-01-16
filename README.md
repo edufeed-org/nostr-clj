@@ -4,6 +4,8 @@ Do nostr stuff with Clojure.
 
 Heavy WIP. At this point it probably won't make much sense too you.
 
+You might have to run `javac -d java $(find java -name "*.java")` 
+
 ## Usage
 
 FIXME: write usage documentation!
