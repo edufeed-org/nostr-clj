@@ -4,8 +4,9 @@
             [deps-deploy.deps-deploy :as dd]))
 
 (def lib 'net.clojars.laoc/nostr)
-(def version "0.0.1")
+(def version (format "0.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
+(def src-dirs ["src" "resources" "java"])
 
 (defn test "Run all the tests." [opts]
   (let [basis    (b/create-basis {:aliases [:test]})
@@ -15,6 +16,12 @@
                     :main-args ["-m" "cognitect.test-runner"]})
         {:keys [exit]} (b/process cmds)]
     (when-not (zero? exit) (throw (ex-info "Tests failed" {}))))
+  opts)
+
+(defn compile-java "Compile Java source files." [opts]
+  (b/javac {:src-dirs ["java"]            ;; Define the Java source directory
+            :class-dir class-dir         ;; Output compiled classes to the target/classes directory
+            :javac-opts ["--release" "11"]}) ;; Specify Java options
   opts)
 
 (defn- pom-template [version]
@@ -40,7 +47,7 @@
           :basis     (b/create-basis {})
           :class-dir class-dir
           :target    "target"
-          :src-dirs  ["src"]
+          :src-dirs  src-dirs
           :pom-data  (pom-template version)))
 
 (defn ci "Run the CI pipeline of tests (and build the JAR)." [opts]
@@ -50,18 +57,20 @@
     (println "\nWriting pom.xml...")
     (b/write-pom opts)
     (println "\nCopying source...")
-    (b/copy-dir {:src-dirs ["resources" "src"] :target-dir class-dir})
+    (b/copy-dir {:src-dirs src-dirs :target-dir class-dir})
     (println "\nBuilding JAR..." (:jar-file opts))
     (b/jar opts))
   opts)
 
 (defn install "Install the JAR locally." [opts]
   (let [opts (jar-opts opts)]
+    (compile-java opts)
     (b/install opts))
   opts)
 
 (defn deploy "Deploy the JAR to Clojars." [opts]
   (let [{:keys [jar-file] :as opts} (jar-opts opts)]
+    (compile-java opts)
     (dd/deploy {:installer :remote :artifact (b/resolve-path jar-file)
                 :pom-file (b/pom-path (select-keys opts [:lib :class-dir]))}))
   opts)
